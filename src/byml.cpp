@@ -134,7 +134,7 @@ private:
 
 class Parser {
 public:
-  Parser(tcb::span<const u8> data) {
+  Parser(tcb::span<const u8> data, bool check_version = true) {
     if (data.size() < sizeof(ResHeader))
       throw InvalidDataError("Invalid header");
 
@@ -147,7 +147,7 @@ public:
     m_reader = {data, endianness};
 
     const u16 version = *m_reader.Read<u16>(offsetof(ResHeader, version));
-    if (!IsValidVersion(version))
+    if (check_version && !IsValidVersion(version))
       throw InvalidDataError("Unexpected version");
 
     m_hash_key_table = StringTableParser(
@@ -451,9 +451,18 @@ Byml Byml::FromBinary(tcb::span<const u8> data) {
   return parser.Parse();
 }
 
+Byml Byml::FromBinaryUncheckedVersion(tcb::span<const u8> data) {
+  byml::Parser parser{data, false};
+  return parser.Parse();
+}
+
 std::vector<u8> Byml::ToBinary(bool big_endian, int version) const {
   if (!byml::IsValidVersion(version))
     throw std::invalid_argument("Invalid version");
+  return ToBinaryUncheckedVersion(big_endian, static_cast<u16>(version));
+}
+
+std::vector<u8> Byml::ToBinaryUncheckedVersion(bool big_endian, u16 version) const {
 
   byml::WriteContext ctx{*this, big_endian ? util::Endianness::Big : util::Endianness::Little};
 

@@ -122,12 +122,18 @@ public:
 
   /// Load a document from binary data.
   static Byml FromBinary(tcb::span<const u8> data);
+  /// Load a document without rejecting an unknown BYML version number.
+  /// All other structural validation remains enabled.
+  static Byml FromBinaryUncheckedVersion(tcb::span<const u8> data);
   /// Load a document from YAML text.
   static Byml FromText(std::string_view yml_text);
 
   /// Serialize the document to BYML with the specified endianness and version number.
   /// This can only be done for Null, Array or Hash nodes.
   std::vector<u8> ToBinary(bool big_endian, int version = 2) const;
+  /// Serialize with any 16-bit BYML version number.
+  /// Prefer ToBinary unless compatibility with a newer version is required.
+  std::vector<u8> ToBinaryUncheckedVersion(bool big_endian, u16 version) const;
   /// Serialize the document to YAML.
   /// This can only be done for Null, Array or Hash nodes.
   std::string ToText() const;
