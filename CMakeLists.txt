@@ -87,3 +87,14 @@ target_link_libraries(oead
     yaml
     zlib
 )
+
+option(OEAD_BUILD_BYML_TOOL "Build the standalone BYML/YAML converter" ON)
+if (OEAD_BUILD_BYML_TOOL)
+  add_executable(oead_byml tools/byml_cli.cpp)
+  target_link_libraries(oead_byml PRIVATE oead)
+  if (MSVC)
+    target_compile_options(oead_byml PRIVATE /W4 /EHsc)
+  else()
+    target_compile_options(oead_byml PRIVATE -Wall -Wextra)
+  endif()
+endif()
